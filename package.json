@@ -1,12 +1,15 @@
 {
-  "name": "private_voting_codespace",
+  "name": "aztec-starter",
   "version": "1.0.0",
   "main": "index.js",
   "repository": "https://github.com/critesjosh/private_voting_codespace.git",
   "author": "Josh Crites <jc@joshcrites.com>",
   "license": "MIT",
-  "private": true,
   "type": "module",
+  "description": "This is a reference repo to help you get started with writing Aztec smart contracts. More info: https://docs.aztec.network/.",
+  "bin": {
+    "aztec-starter": "./npx.js"
+  },
   "scripts": {
     "clean": "rm -rf ./src/artifacts ./target",
     "codegen": "${AZTEC_CLI:-aztec-cli} codegen target --outdir src/artifacts --ts",
@@ -15,7 +18,10 @@
     "update": "aztec-cli update --contract . && ./.github/scripts/update_contract.sh $(grep -oP 'tag\\s*=\\s*\"\\K[^\"]+' \"Nargo.toml\" | head -1)"
   },
   "dependencies": {
-    "@aztec/aztec.js": "0.21.0"
+    "@aztec/aztec.js": "0.21.0",
+    "@inquirer/input": "^1.2.16",
+    "commander": "^11.1.0",
+    "tiged": "^2.12.6"
   },
   "devDependencies": {
     "@aztec/accounts": "0.21.0",
