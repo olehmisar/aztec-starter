@@ -2,14 +2,21 @@ mod test;
 contract EasyPrivateVoting {
     use dep::aztec::prelude::{
         AztecAddress, FunctionSelector, NoteHeader, NoteInterface, NoteGetterOptions, PrivateContext,
-        Map, PublicMutable, SharedImmutable
+        Map, PublicMutable, SharedImmutable, PrivateMutable
     };
+    use dep::aztec::{
+        oracle::{execution::{get_block_number, get_contract_address}, unsafe_rand::unsafe_rand, storage::storage_read},
+        protocol_types::storage::map::derive_storage_slot_in_map
+    };
+    use dep::value_note::{value_note::ValueNote};
+
     #[aztec(storage)]
     struct Storage {
         admin: PublicMutable<AztecAddress>, // admin can end vote
         tally: Map<Field, PublicMutable<Field>>, // we will store candidate as key and number of votes as value
         vote_ended: PublicMutable<bool>, // vote_ended is boolean
         active_at_block: SharedImmutable<u32>, // when people can start voting
+        user_notes: Map<AztecAddress, PrivateMutable<ValueNote>> // user notes
     }
 
     #[aztec(public)]
@@ -26,6 +33,21 @@ contract EasyPrivateVoting {
         storage.admin.write(admin);
         storage.vote_ended.write(false);
         storage.active_at_block.initialize(context.block_number() as u32);
+    }
+
+    #[aztec(private)]
+    fn create_note() {
+        let header = context.get_header_at(get_block_number() - 2);
+        let msg_sender_npk_m_hash = header.get_npk_m_hash(&mut context, context.msg_sender());
+        let mut note = ValueNote::new(1, msg_sender_npk_m_hash);
+        let _ = storage.user_notes.at(context.msg_sender()).initialize(&mut note);
+    }
+
+    #[aztec(private)]
+    fn read_note(owner: AztecAddress) -> pub Field {
+        let note = storage.user_notes.at(owner).get_note().note;
+        let value = note.value;
+        value
     }
 
     #[aztec(private)] // annotation to mark function as private and expose private context

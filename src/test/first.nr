@@ -67,6 +67,20 @@ unconstrained fn test_cast_vote() {
     env.call_private_void(call_interface);
 }
 
+#[test]
+unconstrained fn create_and_read_note() {
+    let (env, voting_contract_address, admin, _) = utils::setup();
+    let alice = env.create_account();
+
+    env.advance_block_by(8);
+
+    let call_interface = EasyPrivateVoting::at(voting_contract_address).create_note();
+    env.call_private_void(call_interface);
+    // env.advance_block_by(6);
+    // let call_interface_1 = EasyPrivateVoting::at(voting_contract_address).read_note(alice);
+    // env.call_private_void(call_interface_1);
+}
+
 #[test(should_fail)]
 unconstrained fn test_end_vote_fail() {
     let (env, voting_contract_address, admin, _) = utils::setup();
