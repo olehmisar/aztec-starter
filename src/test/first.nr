@@ -58,19 +58,20 @@ unconstrained fn test_end_vote() {
 // this test is currently failing. I am debugging
 #[test]
 unconstrained fn test_cast_vote() {
-    let (env, voting_contract_address, admin, _) = utils::setup();
+    let (env, voting_contract_address, _) = utils::setup();
     let alice = env.create_account();
 
     let candidate = 1;
     env.advance_block_by(6);
+
+    env.impersonate(alice);
     let call_interface = EasyPrivateVoting::at(voting_contract_address).cast_vote(candidate);
     env.call_private_void(call_interface);
 }
 
 #[test]
 unconstrained fn create_and_read_note() {
-    let (env, voting_contract_address, admin, _) = utils::setup();
-    let alice = env.create_account();
+    let (env, voting_contract_address, _) = utils::setup();
 
     env.advance_block_by(8);
 
@@ -83,7 +84,7 @@ unconstrained fn create_and_read_note() {
 
 #[test(should_fail)]
 unconstrained fn test_end_vote_fail() {
-    let (env, voting_contract_address, admin, _) = utils::setup();
+    let (env, voting_contract_address, _) = utils::setup();
     let alice = env.create_account();
 
     let call_interface = EasyPrivateVoting::at(voting_contract_address).end_vote();
