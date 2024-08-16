@@ -13,8 +13,8 @@
   "workspaceMount": "source=${localWorkspaceFolder},target=/root/workspace,type=bind",
   "workspaceFolder": "/root/workspace",
   "hostRequirements": {
-    "cpus": 8,
-    "memory": "32gb",
-    "storage": "64gb"
+    "cpus": 4,
+    "memory": "16gb",
+    "storage": "32gb"
   }
 }
