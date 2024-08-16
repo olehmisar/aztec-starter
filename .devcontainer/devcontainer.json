@@ -7,7 +7,7 @@
   "postCreateCommand": "curl -s install.aztec.network | NON_INTERACTIVE=1 BIN_PATH=/usr/local/bin bash -s",
   "customizations": {
     "vscode": {
-      "settings": {},
+      "settings": {}
     }
   },
   "workspaceMount": "source=${localWorkspaceFolder},target=/root/workspace,type=bind",
