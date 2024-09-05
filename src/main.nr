@@ -13,7 +13,7 @@ contract Main {
     #[aztec(storage)]
     struct Storage {
         fields: Map<Field, PublicMutable<[Field; MAX_FIELDS_LEN]>>,
-        //array: PublicMutable<[Field; MAX_FIELDS_LEN]>, <=== this won't compile
+        array: PublicMutable<[Field; MAX_FIELDS_LEN]>, //<=== this won't compile
     }
 
     #[aztec(public)]
