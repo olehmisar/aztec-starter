@@ -1,51 +1,53 @@
-mod test;
+contract Main {
+    use dep::aztec::prelude::{Map, PublicMutable};
+    use dep::aztec::test::{helpers::{cheatcodes, test_environment::TestEnvironment}};
+    use dep::aztec::protocol_types::storage::map::derive_storage_slot_in_map;
+    use dep::aztec::note::note_getter::{MAX_NOTES_PER_PAGE, view_notes};
+    use dep::aztec::{
+        note::note_viewer_options::NoteViewerOptions,
+        oracle::{execution::{get_block_number, get_contract_address}, unsafe_rand::unsafe_rand, storage::storage_read}
+    };
 
-contract EasyPrivateVoting {
-    use dep::aztec::prelude::{AztecAddress, FunctionSelector, PrivateContext, Map, PublicMutable, SharedImmutable};
-    use dep::aztec::keys::getters::get_historical_public_keys;
+    global MAX_FIELDS_LEN = 33;
+
     #[aztec(storage)]
     struct Storage {
-        admin: PublicMutable<AztecAddress>, // admin can end vote
-        tally: Map<Field, PublicMutable<Field>>, // we will store candidate as key and number of votes as value
-        vote_ended: PublicMutable<bool>, // vote_ended is boolean
-        active_at_block: SharedImmutable<u32>, // when people can start voting
+        fields: Map<Field, PublicMutable<[Field; MAX_FIELDS_LEN]>>,
+        //array: PublicMutable<[Field; MAX_FIELDS_LEN]>,
     }
 
     #[aztec(public)]
-    #[aztec(initializer)] // annotation to mark function as a constructor
-    fn constructor(admin: AztecAddress) {
-        storage.admin.write(admin);
-        storage.vote_ended.write(false);
-        storage.active_at_block.initialize(context.block_number() as u32);
-    }
-
-    #[aztec(private)] // annotation to mark function as private and expose private context
-    fn cast_vote(candidate: Field) {
-        // Below, we make sure to get our nullifier public key at a specific block. By pinning the nullifier public key at a specific block,
-        // rotating keys will have no effect on the nullifier being produced, and voting again after will fail because the same nullifier is computed each time the user votes.
-        let header_at_active_at_block = context.get_header_at(storage.active_at_block.read_private());
-        let msg_sender_npk_m_hash = get_historical_public_keys(header_at_active_at_block, context.msg_sender()).npk_m.hash();
-
-        let secret = context.request_nsk_app(msg_sender_npk_m_hash); // get secret key of caller of function
-        let nullifier = std::hash::pedersen_hash([context.msg_sender().to_field(), secret]); // derive nullifier from sender and secret
-        context.push_nullifier(nullifier);
-        EasyPrivateVoting::at(context.this_address()).add_to_tally_public(candidate).enqueue(&mut context);
+    fn setFields(key: Field, input: [Field; MAX_FIELDS_LEN]) {
+        storage.fields.at(key).write(input);
     }
 
     #[aztec(public)]
-    #[aztec(internal)]
-    fn add_to_tally_public(candidate: Field) {
-        assert(storage.vote_ended.read() == false, "Vote has ended"); // assert that vote has not ended
-        let new_tally = storage.tally.at(candidate).read() + 1;
-        storage.tally.at(candidate).write(new_tally);
+    fn getFields(key: Field, index: Field) -> pub Field {
+        storage.fields.at(key).read()[index]
     }
 
-    #[aztec(public)] 
-    fn end_vote() {
-        assert(storage.admin.read().eq(context.msg_sender()), "Only admin can end votes"); // assert that caller is admin
-        storage.vote_ended.write(true);
-    }
-    unconstrained fn get_vote(candidate: Field) -> pub Field {
-        storage.tally.at(candidate).read()
+    #[test]
+    unconstrained fn test_getFields() {
+        let mut env = TestEnvironment::new();
+        let deployer = env.deploy_self("Main");
+        let my_contract_instance = deployer.without_initializer();
+        let key = 1;
+        let call = Main::at(my_contract_instance.to_address()).setFields(
+            1,
+            [
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33
+        ]
+        );
+        env.call_public(call);
+        let block_number = get_block_number();
+
+        let fields_slot = Main::storage().fields.slot;
+        let array_slot = derive_storage_slot_in_map(fields_slot, key);
+        let value: Field = storage_read(
+            my_contract_instance.to_address(),
+            array_slot + 32,
+            block_number
+        );
+        std::println(value);
     }
 }
