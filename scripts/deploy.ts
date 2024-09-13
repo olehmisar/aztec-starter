@@ -30,7 +30,7 @@ async function main() {
 
     let schnorrAccount = await getSchnorrAccount(pxe, secretKey, deriveSigningKey(secretKey), salt);
     const { address, publicKeys, partialAddress } = schnorrAccount.getCompleteAddress();
-    let tx = await schnorrAccount.deploy();
+    let tx = await schnorrAccount.deploy().wait();
     let wallet = await schnorrAccount.register();
 
     await EasyPrivateVotingContract.deploy(wallets[0], address).send().deployed()
