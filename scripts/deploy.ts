@@ -15,14 +15,11 @@ const setupSandbox = async () => {
 async function main() {
 
     let pxe: PXE;
-    let wallets: AccountWallet[] = [];
-    let accounts: CompleteAddress[] = [];
     let logger: DebugLogger;
 
     logger = createDebugLogger('aztec:aztec-starter');
 
     pxe = await setupSandbox();
-    wallets = await getInitialTestAccountsWallets(pxe);
 
     let secretKey = Fr.random();
     let salt = Fr.random();
@@ -33,7 +30,7 @@ async function main() {
     let tx = await schnorrAccount.deploy().wait();
     let wallet = await schnorrAccount.register();
 
-    await EasyPrivateVotingContract.deploy(wallets[0], address).send().deployed()
+    await EasyPrivateVotingContract.deploy(wallet, address).send().deployed()
     // let token = await TokenContract.deploy(wallet, wallet.getAddress(), "Test", "TST", 18).send().deployed();
     // await token.methods.mint_private(wallet.getAddress(), 100).send().wait();
 }
