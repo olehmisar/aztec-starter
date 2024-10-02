@@ -24,18 +24,12 @@ async function main() {
     pxe = await setupSandbox();
     wallets = await getInitialTestAccountsWallets(pxe);
 
-    let secretKey = Fr.random();
-    let salt = Fr.random();
+    console.log("wallet 1", wallets[0].getAddress())
+    console.log("wallet 2", wallets[1].getAddress())
+    console.log("wallet 3", wallets[2].getAddress())
 
-
-    let schnorrAccount = await getSchnorrAccount(pxe, secretKey, deriveSigningKey(secretKey), salt);
-    const { address, publicKeys, partialAddress } = schnorrAccount.getCompleteAddress();
-    let tx = await schnorrAccount.deploy();
-    let wallet = await schnorrAccount.register();
-
-    await EasyPrivateVotingContract.deploy(wallets[0], address).send().deployed()
-    // let token = await TokenContract.deploy(wallet, wallet.getAddress(), "Test", "TST", 18).send().deployed();
-    // await token.methods.mint_private(wallet.getAddress(), 100).send().wait();
+    let wallet = await wallets[0]
+    let token = await TokenContract.deploy(wallet, wallet.getAddress(), "Test", "TST", 18).send().deployed();
 }
 
 main();
