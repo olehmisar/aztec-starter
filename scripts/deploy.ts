@@ -1,7 +1,4 @@
-import { EasyPrivateVotingContractArtifact, EasyPrivateVotingContract } from "../src/artifacts/EasyPrivateVoting.js"
 import { AccountWallet, CompleteAddress, ContractDeployer, createDebugLogger, Fr, PXE, waitForPXE, TxStatus, createPXEClient, getContractInstanceFromDeployParams, DebugLogger } from "@aztec/aztec.js";
-import { getSchnorrAccount } from '@aztec/accounts/schnorr';
-import { AztecAddress, deriveSigningKey } from '@aztec/circuits.js';
 import { TokenContract } from "@aztec/noir-contracts.js";
 import { getInitialTestAccountsWallets } from "@aztec/accounts/testing";
 

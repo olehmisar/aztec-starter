@@ -17,12 +17,27 @@
     "update": "aztec update --contract . && ./.github/scripts/update_contract.sh $(grep -oP 'tag\\s*=\\s*\"\\K[^\"]+' \"Nargo.toml\" | head -1)"
   },
   "dependencies": {
-    "@aztec/aztec.js": "0.56.0",
-    "@aztec/noir-contracts.js": "0.56.0",
+    "@aztec/accounts": "workspace:*",
+    "@aztec/aztec.js": "workspace:*",
+    "@aztec/noir-contracts.js": "workspace:*",
+    "@noir-lang/types": "workspace:*",
     "@types/node": "^22.5.1"
   },
+  "workspaces": {
+    "packages": [
+      "/home/josh/Documents/Github/aztec-packages/yarn-project/aztec.js",
+      "/home/josh/Documents/Github/aztec-packages/yarn-project/accounts",
+      "/home/josh/Documents/Github/aztec-packages/yarn-project/noir-contracts.js",
+      "/home/josh/Documents/Github/aztec-packages/yarn-project/*",
+      "../../Github/aztec-packages/noir/noir-repo/*",
+      "../../Github/aztec-packages/noir/noir-repo/tooling/noir_js_types",
+      "../../Github/aztec-packages/noir/noir-repo/tooling/noir_js",
+      "/home/josh/Documents/Github/aztec-packages/noir/noir-repo/acvm-repo/acvm_js",
+      "/home/josh/Documents/Github/aztec-packages/noir/noir-repo/tooling/noirc_abi_wasm"
+    ]
+  },
+  "packageManager": "yarn@3.6.3",
   "devDependencies": {
-    "@aztec/accounts": "0.56.0",
     "@types/jest": "^29.5.11",
     "@types/mocha": "^10.0.6",
     "@types/node": "^22.5.1",
