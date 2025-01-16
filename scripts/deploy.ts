@@ -1,7 +1,5 @@
-import { EasyPrivateVotingContract } from "../src/artifacts/EasyPrivateVoting.js"
-import { AccountWallet, CompleteAddress, createLogger, Fr, PXE, waitForPXE, createPXEClient, Logger } from "@aztec/aztec.js";
-import { getSchnorrAccount } from '@aztec/accounts/schnorr';
-import { deriveSigningKey } from '@aztec/circuits.js';
+import { AccountWallet, createLogger, PXE, waitForPXE, createPXEClient, Logger, NoFeePaymentMethod } from "@aztec/aztec.js";
+import { GasSettings } from '@aztec/circuits.js';
 import { getInitialTestAccountsWallets } from "@aztec/accounts/testing";
 import { TokenContract } from "@aztec/noir-contracts.js/Token"
 
@@ -16,24 +14,34 @@ async function main() {
 
     let pxe: PXE;
     let wallets: AccountWallet[] = [];
-    let accounts: CompleteAddress[] = [];
     let logger: Logger;
 
     logger = createLogger('aztec:aztec-starter');
 
     pxe = await setupSandbox();
-    wallets = await getInitialTestAccountsWallets(pxe);
-
-    let secretKey = Fr.random();
-    let salt = Fr.random();
-
-    let schnorrAccount = await getSchnorrAccount(pxe, secretKey, deriveSigningKey(secretKey), salt);
-    const { address, publicKeys, partialAddress } = schnorrAccount.getCompleteAddress();
-    let tx = await schnorrAccount.deploy().wait();
-    let wallet = await schnorrAccount.getWallet();
-
-    const votingContract = await EasyPrivateVotingContract.deploy(wallet, address).send().deployed();
-    logger.info(`Voting Contract deployed at: ${votingContract.address}`);
+    const accounts = await getInitialTestAccountsWallets(pxe);
+    const account = accounts[0]!;
+    const token = await TokenContract
+        .deploy(account, account.getAddress(), "test", "test", 18)
+        .send()
+        .deployed();
+    const txRequest = await account.createTxExecutionRequest({
+        calls: [
+            token.methods.balance_of_public(account.getAddress()).request(),
+        ],
+        fee: {
+            gasSettings: GasSettings.default({
+                maxFeesPerGas: await pxe.getCurrentBaseFees(),
+            }),
+            paymentMethod: new NoFeePaymentMethod(),
+        },
+    });
+    const simulated = await account.simulateTx(
+        txRequest,
+        true, // simulatePublic
+        undefined, // fails with account.getAddress(),
+        false, // skipTxValidation
+    );
 }
 
 main();
